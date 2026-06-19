@@ -27,8 +27,8 @@ jobs:
         run: cp combined_proxies.yaml kimcrowing.github.io/iptv/combined_proxies.yaml
 
       # 4. 将 valid_proxies.yaml 文件复制到目标目录
-      - name: Copy combined_proxies.yaml to iptv directory
-        run: cp merged-clash.yaml kimcrowning.github.io/iptv/valid_proxies.yaml
+      - name: Copy merged-clash.yaml to iptv directory
+        run: cp merged-clash.yaml kimcrowing.github.io/iptv/valid_proxies.yaml
 
       # 4b. 将 CN/HK 节点文件复制到目标目录
       - name: Copy CN/HK proxies to iptv directory
