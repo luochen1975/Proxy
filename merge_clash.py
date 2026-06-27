@@ -46,7 +46,6 @@ def validate_proxy(proxy: Dict) -> tuple[bool, str]:
     name = proxy.get("name", "?")
     ptype = proxy.get("type", "")
 
-    # 必须字段
     if not proxy.get("server"):
         return False, f"缺少 server"
     if not proxy.get("port"):
@@ -58,13 +57,11 @@ def validate_proxy(proxy: Dict) -> tuple[bool, str]:
     if proxy.get("flow") == "xtls-rprx-vision" or ptype == "vless":
         reality = proxy.get("reality-opts", {})
         if proxy.get("flow") == "xtls-rprx-vision":
-            # REALITY 必须有 public-key
             if not reality:
                 return False, f"REALITY vless 缺少 reality-opts"
             pk = reality.get("public-key") if isinstance(reality, dict) else None
             if not pk:
                 return False, f"REALITY vless 缺少 public-key"
-            # short-id 格式校验（可选字段，但如果有则必须合法）
             sid = reality.get("short-id") if isinstance(reality, dict) else None
             if sid:
                 sid = sid.strip()
@@ -73,11 +70,9 @@ def validate_proxy(proxy: Dict) -> tuple[bool, str]:
                 if len(sid) not in (0, 2, 4, 8, 16, 32):
                     return False, f"short-id 长度非法 ({len(sid)}): {sid}"
 
-    # vmess/vless uuid 校验
     if ptype in ("vmess", "vless") and not proxy.get("uuid"):
         return False, f"缺少 uuid"
 
-    # trojan password 校验
     if ptype == "trojan" and not proxy.get("password"):
         return False, f"缺少 password"
 
@@ -214,7 +209,6 @@ for src in CONFIG_URLS:
                 continue
             seen_keys.add(key)
 
-            # === 校验节点 ===
             valid, reason = validate_proxy(p)
             if not valid:
                 print(f"  [跳过] {p.get('name', '?')} — {reason}")
@@ -279,7 +273,19 @@ if "proxy-groups" in base_config:
         if "proxies" in group and isinstance(group["proxies"], list):
             group["proxies"] = [name_mapping.get(n, n) for n in group["proxies"] if n in name_mapping]
 
+# ============ [!] 自定义 Dumper：给科学计数法字符串加引号 ============
+
+class ShortIdDumper(yaml.SafeDumper):
+    pass
+
+def _str_representer(dumper, data):
+    if re.match(r'^[0-9]+[eE][0-9]+$', data):
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style="'")
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+ShortIdDumper.add_representer(str, _str_representer)
+
 with open("merged-clash.yaml", "w", encoding="utf-8") as f:
-    yaml.safe_dump(base_config, f, allow_unicode=True, sort_keys=False)
+    yaml.dump(base_config, f, Dumper=ShortIdDumper, allow_unicode=True, sort_keys=False)
 
 print(f"\n完成 → merged-clash.yaml (共 {len(new_proxies)} 个有效节点)")
