@@ -1,6 +1,6 @@
 name: Proxy Server Processing Workflow
 
-#on:
+on:
   workflow_dispatch:
   schedule:
     - cron: '0 13 * * *'
