@@ -1,14 +1,14 @@
 name: Proxy Server Processing Workflow
 
 on:
-    schedule:
+  schedule:
     - cron: '0 13 * * *'
-    workflow_dispatch:
+  workflow_dispatch:
   push:
     branches:
       - master
   pull_request:
-    branches:
+  branches:
       - master
 
 permissions:
