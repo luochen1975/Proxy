@@ -1,9 +1,9 @@
 name: Update Subscribes
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '45 */6 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
